@@ -1,0 +1,79 @@
+**VaderFlix Ripper Pipeline — Status Summary**
+
+---
+
+### ✅ COMPLETED SETUP (as of today)
+
+**Core Hardware + System:**
+
+* macOS-based system
+* External Blu-ray drive: Pioneer BDR-XS07UHD
+* NAS mounted at `/Volumes/data` (Synology, share: `data`)
+
+**Directory Structure:**
+
+* `/Volumes/data/rips` → Raw MakeMKV output
+* `/Volumes/data/staging` → Post-FileBot MKV files (awaiting encoding)
+* `/Volumes/data/final` → Final encoded `.mp4` files
+
+**Pipeline Components:**
+
+* `rip-disc.sh` → Detects disc label, rips only the longest title via MakeMKV
+* `rename-with-filebot.sh` → Uses folder name + `-non-strict` to match via FileBot
+* `transcode-handbrake.sh` → Encodes with HandBrakeCLI (Fast 1080p30) and purges inputs post-success
+* `run-pipeline.sh` → Wraps everything together, includes `caffeinate` to prevent sleep
+
+**Verified Successful Rips:**
+
+* Borat (2006)
+* Six-String Samurai (1998)
+
+**Confirmed Features Working:**
+
+* Longest-title detection from TINFO lines
+* FileBot renaming using folder context (with fallback to `-non-strict`)
+* Final encode output correctly placed in `/final`
+* Clean post-processing: staging file is deleted and rip folder is already empty by that point (no need to force delete)
+* `caffeinate` prevents system sleep during pipeline run
+
+**Logging Quality:**
+
+* Clear progress output at each step
+* Echoed folder names, titles, and cleanup confirmations
+* Minimal terminal spam, useful for real-time feedback
+
+---
+
+### 🛠️ NEXT TO-DO LIST
+
+* **Clean up HandBrake logging further**: Reduce verbosity or redirect logs to a file instead of flooding terminal
+* **Verify how FileBot handles ambiguous or obscure titles**: e.g., "American Movie"
+* **Optional: Investigate a faster drive**: Possibly ASUS BW-16D1HT with UASP enclosure
+* **Optional: Add mount check at the beginning of `run-pipeline.sh`**
+
+  ```bash
+  if [ ! -d "/Volumes/data" ]; then
+    echo "❌ NAS volume not mounted. Aborting pipeline."
+    exit 1
+  fi
+  ```
+* **Optional: Add timestamped logging to file for audit/debugging**
+* **Eventually: Build parallel pipeline for TV shows (Sonarr-style)**
+* **Tomorrow**: Begin setup of the full automation stack (Radarr, Sonarr, Prowlarr, qBittorrent)
+
+---
+
+### ⚡ Optional Enhancements Later
+
+* Smart title skipping logic based on runtime (for episodic discs)
+* Live dashboard of pipeline state (CLI, web app, or Grafana)
+* Remote notification on pipeline complete (e.g., Pushbullet or email)
+* Remote disc eject on completion via AppleScript or command
+
+---
+
+**Project Name:** VaderFlix
+**Network Name:** Fallon's Beard
+**Pipeline Output:** Final Gravy
+
+*This is the way.*
